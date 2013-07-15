@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>checkcode的demo</title>
+	<link rel="stylesheet" href="http://a.tbcdn.cn/??p/global/1.0/global-min.css">
+	<link rel="stylesheet" href="index.css">
+	<script type="text/javascript">
+		var ua = "";
+		var UA_Opt = new Object;
+		UA_Opt.LogVal = "ua";
+		UA_Opt.MaxMCLog = 3;
+		UA_Opt.MaxMPLog = 3;
+		UA_Opt.MaxKSLog = 3;
+		UA_Opt.Token = new Date().getTime() + ":" + Math.random();
+		UA_Opt.SendMethod = 8;
+		UA_Opt.Flag = 14222;
+	</script>
+    <script src="http://a.tbcdn.cn/s/kissy/1.3.0/kissy-min.js"></script>
+</head>
+<body>
+	<h2 class="mod-title">checkcode的demo</h2>
+	<div class="widget-m-message">
+		<div class="widget-m-flightlist">
+			<img src="http://img02.taobaocdn.com/tps/i2/T1cee3XDFiXXcg..fG-259-321.png"
+			     alt="整点9元机票" class="J_GrabFlightMobilePic"/>
+		</div>
+		<div class="tripapp-download-wrap">
+			<h2>立即下载客户端，参与秒杀！</h2>
+			<ul>
+				<li class="clearfix">
+					<h3><span class="method-seq">方法一：</span>直接输入手机号码，获取下载链接</h3>
+
+					<div class="sms-send-wrap">
+						<form id="J_CKForm502">
+							<input type="tel" name="phonenum" class="user-phone-num" placeholder="请输入手机号"/>
+							<input type="text" name="checkcode" class="checkcode-inp J_CK_INP" size="4" maxlength="4"
+							       placeholder="验证码"/>
+							<img class="checkcode-img J_CK_IMG"/>
+							<a class="checkcode-update">看不清换一张</a>
+							<div class="submit-div">
+								<div class="submit-loading J_CK_LOADING"></div>
+								<button type="submit" class="bg-sprite send-sms-btn"></button>
+							</div>
+							<span class="checkcode-error J_CK_ERROR"></span>
+						</form>
+					</div>
+				</li>
+				<li class="clearfix">
+					<h3><span class="method-seq">方法二：</span>扫描二维码</h3>
+
+					<div class="tripapp-qrcode-wrap">
+						<div class="tripapp-qrcode">
+							<div class="tripapp-qrcode-ios bg-sprite">
+								<p>iOS版</p>
+							</div>
+							<div class="tripapp-qrcode-android bg-sprite">
+								<p>Android版</p>
+							</div>
+						</div>
+						<p class="tripapp-qrcode-tip">
+							温馨提示：可以打开微信扫一扫，或者淘宝客户端扫描二维码哟！</p>
+					</div>
+				</li>
+				<li class="clearfix">
+					<h3><span class="method-seq">方法三：</span>软件市场搜索</h3>
+
+					<p>温馨提示：例如，app store，Play store，豌豆荚等，直接搜索“淘宝旅行”</p>
+				</li>
+				<li class="clearfix">
+					<h3><span class="method-seq">方法四：</span>电脑直接下载</h3>
+
+					<div class="tripapp-download-btn">
+						<a href="http://itunes.apple.com/cn/app/id453691481?spm=0.0.0.0.VhCvEE&mt=8"
+						   class="tripapp-ios-download bg-sprite"></a>
+						<a href="http://download.taobaocdn.com/nbdev-client/client4trip/trip.apk?spm=0.0.0.0.VhCvEE&file=trip.apk"
+						   class="tripapp-android-download bg-sprite"></a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<script src="http://acjs.aliyun.com/actionlog/js/ua.js"></script>
+	<script>
+	    var S = KISSY;
+	    S.Config.debug = true;
+	    if (S.Config.debug) {
+	        var srcPath = "../../../";
+	        S.config({
+	            packages:[
+	                {
+	                    name:"gallery",
+	                    path:srcPath,
+	                    charset:"utf-8",
+	                    ignorePackageNameInUri:true
+	                }
+	            ]
+	        });
+	    }
+
+	    S.use('gallery/checkcode/1.0/index', function (S, CheckCode) {
+		    var checkcode = new CheckCode({
+			    form: "#J_CKForm502",
+			    checkUrl: 'http://promotion.trip.taobao.com/weibo/weibo_check_code_url.htm',
+			    validateUrl: 'http://promotion.trip.taobao.com/platform/send_mobile_message704.htm?'
+		    });
+		    var errorMsg = {
+			    "100003" : "验证码错误，请重新输入！",
+			    "100006" : "亲，你的验证码已超时，请重新输入哦~",
+			    "100008" : "亲，服务器繁忙，请刷新重试哦~",
+			    "400011" : "亲，短信发送失败！",
+			    "400012" : "亲，手机号码输入有误哦！",
+			    "400013" : "亲，同一号码不可以频繁发送哦！",
+			    "400014" : "亲，您的手机号码发送次数已达上限！",
+			    "400015" : "亲，您的发送次数已达上限！"
+		    };
+		    checkcode.on('subSuccess', function(data){
+			    alert('Success');
+			    S.log(data);
+			    var that = this;
+			    var code = data.code;
+			    //短信发送成功
+			    if(400010 == code){
+				    that.setErr(data.msg);
+				    //that.clearCheckcode();
+			    }else{
+				    //验证码错误
+				    if (100003 == code) {
+					    that.setErr("验证码错误，请重新输入").updateImg();
+					    return;
+				    }
+
+				    that.clearCheckcode();
+				    that.setErr(errorMsg[code]);
+			    }
+		    }).on('subError', function(){
+				var that = this;
+			    that.setErr(errorMsg[100008]);
+			    that.clearCheckcode();
+		    });
+	    })
+	</script>
+</body>
+</html>
