@@ -102,7 +102,16 @@
 		    var checkcode = new CheckCode({
 			    form: "#J_CKForm502",
 			    checkUrl: 'http://promotion.trip.taobao.com/weibo/weibo_check_code_url.htm',
-			    validateUrl: 'http://promotion.trip.taobao.com/platform/send_mobile_message704.htm?'
+			    validateUrl: 'http://promotion.trip.taobao.com/platform/send_mobile_message704.htm?',
+                validateForm: function(){
+                    var phonenum = S.trim(that['phoneNum'].val());
+                    if(!(/^0{0,1}(13[0-9]|15[0-3|5-9]|18[0|2|5-9])[0-9]{8}$/).test(phonenum)){
+                        this.setErr('手机号格式有误！');
+                        //that.clearCheckcode();
+                        return false;
+                    }
+                    return true;
+                }
 		    });
 		    var errorMsg = {
 			    "100003" : "验证码错误，请重新输入！",

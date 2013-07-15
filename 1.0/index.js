@@ -87,29 +87,23 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         submitFn       : function(param){
             var that = this;
-
-
-            var phonenum = S.trim(that['phoneNum'].val());
-            if(!(/^0{0,1}(13[0-9]|15[0-3|5-9]|18[0|2|5-9])[0-9]{8}$/).test(phonenum)){
-                that.setErr('手机号格式有误！');
-                //that.clearCheckcode();
-                return false;
+            var validateForm = that.get('validateForm');
+            if(validateForm()){
+                var url = that.get('validateUrl') || 'http://promotion.trip.' + that._host + '/platform/send_mobile_message704.htm?';
+                new IO({
+                    type     : "get",
+                    url      : url + "phonenum=" + phonenum + "&" + param,
+                    form     : that.form,
+                    success  : function (data) {
+                        that.fire('subSuccess', data);
+                    },
+                    error    : function () {
+                        that.fire('subError');
+                    },
+                    dataType : "jsonp",
+                    timeout  : 15
+                });
             }
-
-            var url = that.get('validateUrl') || 'http://promotion.trip.' + that._host + '/platform/send_mobile_message704.htm?';
-            new IO({
-                type     : "get",
-                url      : url + "phonenum=" + phonenum + "&" + param,
-                form     : that.form,
-                success  : function (data) {
-                    that.fire('subSuccess', data);
-                },
-                error    : function () {
-                    that.fire('subError');
-                },
-                dataType : "jsonp",
-                timeout  : 15
-            });
         },
         bindUI         : function () {
             var that = this;
@@ -236,6 +230,14 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         validataUrl: {
             value: 'http://promotion.trip.' + this._host + '/platform/send_mobile_message704.htm?'
+        },
+        validateForm: {
+            value: function(){},
+            setter: function(val){
+                if(!S.isFunction(val)){
+                    throw('Validate form method should be a function, please check and retry!');
+                }
+            }
         },
         _validateNode: function(name, val){
             var form = this.get('form');
