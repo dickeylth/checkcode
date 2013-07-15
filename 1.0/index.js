@@ -20,8 +20,6 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         self.init(config);
     }
 
-
-
     S.extend(Checkcode, Base, /** @lends Checkcode.prototype*/{
         init           : function (config) {
             var that = this;
@@ -38,6 +36,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             that.getCheckcodeUrl = that.get('fetchUrl') || 'http://promotion.trip.' + that._host + '/weibo/weibo_check_code_url.htm';
 
             var form = that.get('form');
+            that.form = form;
 
             if(!ua || ua == ''){
                 throw('UA must be existing, please check and retry!');
@@ -49,6 +48,9 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 if(item.attr('placeholder')){
                     new Placeholder({node: item});
                 }
+                if(!item.attr('name') && !item.hasClass('J_CK_INP')){
+                    S.log(item.outerHTML() + ' doesn\'t has name attribute, make sure it won\'t matter form submit.');
+                }
             });
         },
         initAttr       : function () {
@@ -59,7 +61,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             var that = this;
 
             var ajaxCfg = {
-                url      : that.getCheckcodeUrl + "?&t=" + new Date().getTime(),
+                url      : that.getCheckcodeUrl + "?&t=" + S.now(),
                 dataType : "jsonp",
                 success  : function (data) {
                     var code = data.code;
@@ -88,11 +90,11 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         submitFn       : function(param){
             var that = this;
             var validateForm = that.get('validateForm');
-            if(validateForm()){
-                var url = that.get('validateUrl') || 'http://promotion.trip.' + that._host + '/platform/send_mobile_message704.htm?';
+            if(validateForm(that)){
+                var url = that.get('validateUrl');
                 new IO({
                     type     : "get",
-                    url      : url + "phonenum=" + phonenum + "&" + param,
+                    url      : url + "?" + param,
                     form     : that.form,
                     success  : function (data) {
                         that.fire('subSuccess', data);
@@ -107,32 +109,32 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         bindUI         : function () {
             var that = this;
+            var form = that.get('form');
+            var img = that.get('ckImgNode');
+            var codeNode = that.get('ckInpNode');
+            var errNode = that.get('ckErrorNode');
 
-            that.form.on('submit', function (e) {
+            form.on('submit', function (e) {
                 e.halt();
 
-                if (that.codeNode.val().length < 4) {
-                    that.errNode.css("display", "block").html('亲，请先输入验证码哦！');
+                if (codeNode.val().length < 4) {
+                    errNode.css("display", "block").html('亲，请先输入验证码哦！');
                     return;
                 }
 
                 that.showWaiting();
-                var param = "checkcode=" + that.codeNode.val() + "&csk=" + that._csk + "&cst=" + that._cst + "&ua=" + that.flushUA() + "&t=" + new Date().getTime();
+                var param = "checkcode=" + codeNode.val() + "&csk=" + that._csk + "&cst=" + that._cst + "&ua=" + that.flushUA() + "&t=" + S.now();
 
                 that.clearErr();
                 that.submitFn(param);
 
             });
 
-            that.form.one('a.checkcode-update').on('click', function (e) {
+            img.on('click', function () {
                 that.updateImg();
             });
 
-            that.img.on('click', function () {
-                that.updateImg();
-            });
-
-            that.codeNode.on('focus', function () {
+            codeNode.on('focus', function () {
                 that.setErr("");
             });
         },
@@ -140,20 +142,21 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             var that = this;
 
             that.fetchCheckcode(function () {
-                that.img.attr("src", that._url + "&t=" + new Date().getTime());
+                var img = that.get('ckImgNode');
+                img.attr("src", that._url + "&t=" + new Date().getTime());
             });
         },
         show           : function () {
             var that = this;
 
-            that.codeNode.val("");
+            that.get('ckInpNode').val("");
             that.updateImg();
             that.hideWaiting();
         },
         clearErr       : function () {
             var that = this;
 
-            that.errNode.html("").hide();
+            that.get('ckErrorNode').html("").hide();
 
             return that;
         },
@@ -162,7 +165,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             if(msg){
                 var that = this;
                 that.hideWaiting();
-                that.errNode.html(msg).show();
+                that.get('ckErrorNode').html(msg).show();
             }
 
             return that;
@@ -177,17 +180,28 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         showWaiting    : function () {
             var that = this;
-
-            that.waiting.show();
+            var loading = that.get('ckLoadingNode');
+            loading.show();
 
             return that;
         },
         hideWaiting    : function () {
             var that = this;
-
-            that.waiting.hide();
+            var loading = that.get('ckLoadingNode');
+            loading.hide();
 
             return that;
+        },
+        _validateNode: function(name, val){
+            var form = this.get('form');
+            var node = S.isString(val) ? form.one(val) : val;
+            if(S.isNull(node)){
+                throw(name + ' node is undefined or null, please check and retry!');
+            }
+            return node;
+        },
+        _getNode: function(val){
+            return this.get('form').one(val);
         }
     }, {ATTRS : /** @lends Checkcode*/{
         form: {
@@ -202,55 +216,58 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             }
         },
         ckImgNode: {
-            value: '.J_CK_IMG',
+            valueFn: function(){
+                return this._getNode('.J_CK_IMG');
+            },
             setter: function(val){
                 return this._validateNode('Checkcode image', val);
             }
         },
         ckInpNode: {
-            value: '.J_CK_INP',
+            valueFn: function(){
+                return this._getNode('.J_CK_INP');
+            },
             setter: function(val){
                 return this._validateNode('Checkcode input', val);
             }
         },
         ckLoadingNode: {
-            value: '.J_CK_LOADING',
+            valueFn: function(){
+                return this._getNode('.J_CK_LOADING');
+            },
             setter: function(val){
                 return this._validateNode('Checkcode loading/waiting', val);
             }
         },
         ckErrorNode: {
-            value: '.J_CK_ERROR',
+            valueFn: function(){
+                return this._getNode('.J_CK_ERROR');
+            },
             setter: function(val){
                 return this._validateNode('Checkcode error', val);
             }
         },
         fetchUrl: {
-            value: 'http://promotion.trip.' + this._host + '/weibo/weibo_check_code_url.htm'
+            valueFn: function(){
+                return 'http://promotion.trip.' + this._host + '/weibo/weibo_check_code_url.htm';
+            }
         },
         validataUrl: {
-            value: 'http://promotion.trip.' + this._host + '/platform/send_mobile_message704.htm?'
+            valueFn: function(){
+                return 'http://promotion.trip.' + this._host + '/platform/send_mobile_message704.htm';
+            }
         },
         validateForm: {
-            value: function(){},
+            value: function(){
+                return true;
+            },
             setter: function(val){
                 if(!S.isFunction(val)){
                     throw('Validate form method should be a function, please check and retry!');
                 }
             }
-        },
-        _validateNode: function(name, val){
-            var form = this.get('form');
-            var node = S.isString(val) ? form.one(val) : val;
-            if(S.isNull(node)){
-                throw(name + ' node is undefined or null, please check and retry!');
-            }
-            return node;
         }
     }});
 
     return Checkcode;
 }, {requires : ['ajax', 'node', 'base', 'gallery/placeholder/1.0/']});
-
-
-

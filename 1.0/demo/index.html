@@ -34,7 +34,7 @@
 					<div class="sms-send-wrap">
 						<form id="J_CKForm502">
 							<input type="tel" name="phonenum" class="user-phone-num" placeholder="请输入手机号"/>
-							<input type="text" name="checkcode" class="checkcode-inp J_CK_INP" size="4" maxlength="4"
+							<input type="text" class="checkcode-inp J_CK_INP" size="4" maxlength="4"
 							       placeholder="验证码"/>
 							<img class="checkcode-img J_CK_IMG"/>
 							<a class="checkcode-update">看不清换一张</a>
@@ -102,11 +102,11 @@
 		    var checkcode = new CheckCode({
 			    form: "#J_CKForm502",
 			    checkUrl: 'http://promotion.trip.taobao.com/weibo/weibo_check_code_url.htm',
-			    validateUrl: 'http://promotion.trip.taobao.com/platform/send_mobile_message704.htm?',
-                validateForm: function(){
-                    var phonenum = S.trim(that['phoneNum'].val());
+			    validateUrl: 'http://promotion.trip.taobao.com/platform/send_mobile_message704.htm',
+                validateForm: function(that){
+                    var phonenum = S.trim(that.get('form').one('.user-phone-num').val());
                     if(!(/^0{0,1}(13[0-9]|15[0-3|5-9]|18[0|2|5-9])[0-9]{8}$/).test(phonenum)){
-                        this.setErr('手机号格式有误！');
+                        that.setErr('手机号格式有误！');
                         //that.clearCheckcode();
                         return false;
                     }
@@ -124,7 +124,6 @@
 			    "400015" : "亲，您的发送次数已达上限！"
 		    };
 		    checkcode.on('subSuccess', function(data){
-			    alert('Success');
 			    S.log(data);
 			    var that = this;
 			    var code = data.code;
@@ -147,6 +146,9 @@
 			    that.setErr(errorMsg[100008]);
 			    that.clearCheckcode();
 		    });
+            checkcode.get('form').one('a.checkcode-update').on('click', function (e) {
+                checkcode.updateImg();
+            });
 	    })
 	</script>
 </body>
