@@ -1,13 +1,14 @@
 /**
- * @fileoverview 
+ * @fileoverview
  * @author hongshu<tiehang.lth@taobao.com>
  * @module checkcode
  **/
 KISSY.add(function (S, IO, Node, Base, Placeholder) {
     var EMPTY = '';
     var $ = Node.all;
+
     /**
-     * 
+     *
      * @class Checkcode
      * @param config
      * @constructor
@@ -21,7 +22,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
     }
 
     S.extend(Checkcode, Base, /** @lends Checkcode.prototype*/{
-        init           : function (config) {
+        init: function (config) {
             var that = this;
 
             that.initAttr();
@@ -30,7 +31,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             that.bindUI();
             that.show();
         },
-        initParam      : function (config) {
+        initParam: function (config) {
             var that = this;
 
             that.getCheckcodeUrl = that.get('fetchUrl') || 'http://promotion.trip.' + that._host + '/weibo/weibo_check_code_url.htm';
@@ -38,32 +39,32 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             var form = that.get('form');
             that.form = form;
 
-            if(!ua || ua == ''){
+            if (!ua || ua == '') {
                 throw('UA must be existing, please check and retry!');
                 return;
             }
 
             //Add placeholder for input fields in the form
-            form.all('input').each(function(item){
-                if(item.attr('placeholder')){
+            form.all('input').each(function (item) {
+                if (item.attr('placeholder')) {
                     new Placeholder({node: item});
                 }
-                if(!item.attr('name') && !item.hasClass('J_CK_INP')){
+                if (!item.attr('name') && !item.hasClass('J_CK_INP')) {
                     S.log(item.outerHTML() + ' doesn\'t has name attribute, make sure it won\'t matter form submit.');
                 }
             });
         },
-        initAttr       : function () {
+        initAttr: function () {
             var that = this;
             that._host = location.hostname.indexOf('daily.taobao.net') > 0 ? 'daily.taobao.net' : 'taobao.com';
         },
-        fetchCheckcode : function (callback) {
+        fetchCheckcode: function (callback) {
             var that = this;
 
             var ajaxCfg = {
-                url      : that.getCheckcodeUrl + "?&t=" + S.now(),
-                dataType : "jsonp",
-                success  : function (data) {
+                url: that.getCheckcodeUrl + "?&t=" + S.now(),
+                dataType: "jsonp",
+                success: function (data) {
                     var code = data.code;
 
                     if (data.code == 200) {
@@ -81,33 +82,33 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
             IO(ajaxCfg);
 
         },
-        clearCheckcode : function(){
+        clearCheckcode: function () {
             var that = this;
-            that.waiting.css("display", "none");
+            that.get('ckLoadingNode').css("display", "none");
             that.clearErr();
             that.updateImg();
         },
-        submitFn       : function(param){
+        submitFn: function (param) {
             var that = this;
             var validateForm = that.get('validateForm');
-            if(validateForm(that)){
+            if (validateForm(that)) {
                 var url = that.get('validateUrl');
                 new IO({
-                    type     : "get",
-                    url      : url + "?" + param,
-                    form     : that.form,
-                    success  : function (data) {
+                    type: "get",
+                    url: url + "?" + param,
+                    form: that.form,
+                    success: function (data) {
                         that.fire('subSuccess', data);
                     },
-                    error    : function () {
+                    error: function () {
                         that.fire('subError');
                     },
-                    dataType : "jsonp",
-                    timeout  : 15
+                    dataType: "jsonp",
+                    timeout: 15
                 });
             }
         },
-        bindUI         : function () {
+        bindUI: function () {
             var that = this;
             var form = that.get('form');
             var img = that.get('ckImgNode');
@@ -138,7 +139,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 that.setErr("");
             });
         },
-        updateImg      : function () {
+        updateImg: function () {
             var that = this;
 
             that.fetchCheckcode(function () {
@@ -146,23 +147,23 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 img.attr("src", that._url + "&t=" + new Date().getTime());
             });
         },
-        show           : function () {
+        show: function () {
             var that = this;
 
             that.get('ckInpNode').val("");
             that.updateImg();
             that.hideWaiting();
         },
-        clearErr       : function () {
+        clearErr: function () {
             var that = this;
 
             that.get('ckErrorNode').html("").hide();
 
             return that;
         },
-        setErr         : function (msg) {
+        setErr: function (msg) {
 
-            if(msg){
+            if (msg) {
                 var that = this;
                 that.hideWaiting();
                 that.get('ckErrorNode').html(msg).show();
@@ -170,7 +171,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
 
             return that;
         },
-        flushUA        : function () {
+        flushUA: function () {
             var _ua = encodeURIComponent(ua);
 
             UA_Opt.Token = new Date().getTime() + ":" + Math.random();
@@ -178,91 +179,91 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
 
             return _ua;
         },
-        showWaiting    : function () {
+        showWaiting: function () {
             var that = this;
             var loading = that.get('ckLoadingNode');
             loading.show();
 
             return that;
         },
-        hideWaiting    : function () {
+        hideWaiting: function () {
             var that = this;
             var loading = that.get('ckLoadingNode');
             loading.hide();
 
             return that;
         },
-        _validateNode: function(name, val){
+        _validateNode: function (name, val) {
             var form = this.get('form');
             var node = S.isString(val) ? form.one(val) : val;
-            if(S.isNull(node)){
+            if (S.isNull(node)) {
                 throw(name + ' node is undefined or null, please check and retry!');
             }
             return node;
         },
-        _getNode: function(val){
+        _getNode: function (val) {
             return this.get('form').one(val);
         }
-    }, {ATTRS : /** @lends Checkcode*/{
+    }, {ATTRS: /** @lends Checkcode*/{
         form: {
             value: '',
-            setter: function(val){
+            setter: function (val) {
                 var $ = S.one;
                 var form = S.isString(val) ? $(val) : val;
-                if(S.isNull(form)){
+                if (S.isNull(form)) {
                     throw('Form is undefined or null, please check and retry!');
                 }
                 return form;
             }
         },
         ckImgNode: {
-            valueFn: function(){
+            valueFn: function () {
                 return this._getNode('.J_CK_IMG');
             },
-            setter: function(val){
+            setter: function (val) {
                 return this._validateNode('Checkcode image', val);
             }
         },
         ckInpNode: {
-            valueFn: function(){
+            valueFn: function () {
                 return this._getNode('.J_CK_INP');
             },
-            setter: function(val){
+            setter: function (val) {
                 return this._validateNode('Checkcode input', val);
             }
         },
         ckLoadingNode: {
-            valueFn: function(){
+            valueFn: function () {
                 return this._getNode('.J_CK_LOADING');
             },
-            setter: function(val){
+            setter: function (val) {
                 return this._validateNode('Checkcode loading/waiting', val);
             }
         },
         ckErrorNode: {
-            valueFn: function(){
+            valueFn: function () {
                 return this._getNode('.J_CK_ERROR');
             },
-            setter: function(val){
+            setter: function (val) {
                 return this._validateNode('Checkcode error', val);
             }
         },
         fetchUrl: {
-            valueFn: function(){
+            valueFn: function () {
                 return 'http://promotion.trip.' + this._host + '/weibo/weibo_check_code_url.htm';
             }
         },
         validataUrl: {
-            valueFn: function(){
+            valueFn: function () {
                 return 'http://promotion.trip.' + this._host + '/platform/send_mobile_message704.htm';
             }
         },
         validateForm: {
-            value: function(){
+            value: function () {
                 return true;
             },
-            setter: function(val){
-                if(!S.isFunction(val)){
+            setter: function (val) {
+                if (!S.isFunction(val)) {
                     throw('Validate form method should be a function, please check and retry!');
                 }
             }
@@ -270,4 +271,4 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
     }});
 
     return Checkcode;
-}, {requires : ['ajax', 'node', 'base', 'gallery/placeholder/1.0/']});
+}, {requires: ['ajax', 'node', 'base', 'gallery/placeholder/1.0/']});
