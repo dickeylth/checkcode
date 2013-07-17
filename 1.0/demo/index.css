@@ -64,41 +64,6 @@
 .widget-m-message .tripapp-download-wrap .bg-sprite {
   background: url("http://img04.taobaocdn.com/tps/i4/T1z.pyFaVXXXctLWj4-200-232.png") no-repeat;
 }
-.widget-m-message .tripapp-download-wrap form {
-  overflow: hidden;
-  position: relative;
-}
-.widget-m-message .tripapp-download-wrap form .submit-div {
-  width: 83px;
-  height: 38px;
-  position: relative;
-}
-.widget-m-message .tripapp-download-wrap form .submit-div .submit-loading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url("http://img04.taobaocdn.com/tps/i4/T1.DCEXe0oXXXXXXXX-32-32.gif") 50% 50% no-repeat #b3a27f;
-}
-.widget-m-message .tripapp-download-wrap form .submit-div .send-sms-btn {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-.widget-m-message .tripapp-download-wrap form .checkcode-update {
-  width: 40px;
-  color: #e4d9b7;
-  padding: 0 2px;
-}
-.widget-m-message .tripapp-download-wrap form input,
-.widget-m-message .tripapp-download-wrap form div,
-.widget-m-message .tripapp-download-wrap form a,
-.widget-m-message .tripapp-download-wrap form span,
-.widget-m-message .tripapp-download-wrap form img {
-  float: left;
-  margin-right: 2px;
-}
 .widget-m-message .tripapp-download-wrap .tripapp-qrcode-wrap .tripapp-qrcode {
   overflow: hidden;
 }
@@ -143,4 +108,39 @@
 .widget-m-message .tripapp-download-wrap .tripapp-download-btn .tripapp-android-download {
   background-position: 0px -90px;
   width: 200px;
+}
+form {
+  overflow: hidden;
+  position: relative;
+}
+form .submit-div {
+  width: 83px;
+  height: 38px;
+  position: relative;
+}
+form .submit-div .submit-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("http://img04.taobaocdn.com/tps/i4/T1.DCEXe0oXXXXXXXX-32-32.gif") 50% 50% no-repeat #b3a27f;
+}
+form .submit-div .send-sms-btn {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+form .checkcode-update {
+  width: 40px;
+  color: #e4d9b7;
+  padding: 0 2px;
+}
+form input,
+form div,
+form a,
+form span,
+form img {
+  float: left;
+  margin-right: 2px;
 }
