@@ -125,8 +125,10 @@
 		    };
 		    checkcode.on('subSuccess', function(data){
 			    S.log(data);
+
 			    var that = this;
 			    var code = data.code;
+
 			    //短信发送成功
 			    if(400010 == code){
 				    that.setErr(data.msg);
@@ -142,7 +144,9 @@
 				    that.setErr(errorMsg[code]);
 			    }
 		    }).on('subError', function(){
+
 				var that = this;
+
 			    that.setErr(errorMsg[100008]);
 			    that.clearCheckcode();
 		    });

@@ -4,8 +4,6 @@
  * @module checkcode
  **/
 KISSY.add(function (S, IO, Node, Base, Placeholder) {
-    var EMPTY = '';
-    var $ = Node.all;
 
     /**
      *
@@ -22,30 +20,34 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
     }
 
     S.extend(Checkcode, Base, /** @lends Checkcode.prototype*/{
+
+        /**
+         * init checkcode
+         * @param config
+         */
         init: function (config) {
             var that = this;
 
-            that.initAttr();
-            that.initParam(config || {});
+            that.initEnv();
 
             that.bindUI();
-            that.show();
+            that.render();
         },
-        initParam: function (config) {
+        /**
+         * init environment
+         */
+        initEnv: function () {
             var that = this;
+            that._host = location.hostname.indexOf('daily.taobao.net') > 0 ? 'daily.taobao.net' : 'taobao.com';
 
-            that.getCheckcodeUrl = that.get('fetchUrl') || 'http://promotion.trip.' + that._host + '/weibo/weibo_check_code_url.htm';
-
-            var form = that.get('form');
-            that.form = form;
-
+            //Confirm existing of ua, rely on ua
             if (!ua || ua == '') {
                 throw('UA must be existing, please check and retry!');
                 return;
             }
 
             //Add placeholder for input fields in the form
-            form.all('input').each(function (item) {
+            that.get('form').all('input').each(function (item) {
                 if (item.attr('placeholder')) {
                     new Placeholder({node: item});
                 }
@@ -54,15 +56,18 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 }
             });
         },
-        initAttr: function () {
+        render: function () {
             var that = this;
-            that._host = location.hostname.indexOf('daily.taobao.net') > 0 ? 'daily.taobao.net' : 'taobao.com';
+
+            that.get('ckInpNode').val("");
+            that.updateImg();
+            that.hideWaiting();
         },
         fetchCheckcode: function (callback) {
             var that = this;
 
             var ajaxCfg = {
-                url: that.getCheckcodeUrl + "?&t=" + S.now(),
+                url: that.get('fetchUrl') + "?&t=" + S.now(),
                 dataType: "jsonp",
                 success: function (data) {
                     var code = data.code;
@@ -81,6 +86,14 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
 
             IO(ajaxCfg);
 
+        },
+        updateImg: function () {
+            var that = this;
+
+            that.fetchCheckcode(function () {
+                var img = that.get('ckImgNode');
+                img.attr("src", that._url + "&t=" + new Date().getTime());
+            });
         },
         clearCheckcode: function () {
             var that = this;
@@ -139,21 +152,6 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 that.setErr("");
             });
         },
-        updateImg: function () {
-            var that = this;
-
-            that.fetchCheckcode(function () {
-                var img = that.get('ckImgNode');
-                img.attr("src", that._url + "&t=" + new Date().getTime());
-            });
-        },
-        show: function () {
-            var that = this;
-
-            that.get('ckInpNode').val("");
-            that.updateImg();
-            that.hideWaiting();
-        },
         clearErr: function () {
             var that = this;
 
@@ -181,6 +179,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         showWaiting: function () {
             var that = this;
+
             var loading = that.get('ckLoadingNode');
             loading.show();
 
@@ -188,6 +187,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
         },
         hideWaiting: function () {
             var that = this;
+
             var loading = that.get('ckLoadingNode');
             loading.hide();
 
@@ -253,7 +253,7 @@ KISSY.add(function (S, IO, Node, Base, Placeholder) {
                 return 'http://promotion.trip.' + this._host + '/weibo/weibo_check_code_url.htm';
             }
         },
-        validataUrl: {
+        validateUrl: {
             valueFn: function () {
                 return 'http://promotion.trip.' + this._host + '/platform/send_mobile_message704.htm';
             }
