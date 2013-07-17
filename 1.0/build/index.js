@@ -1,9 +1,15 @@
+/*
+combined files : 
+
+gallery/checkcode/1.0/index
+
+*/
 /**
  * @fileoverview
  * @author hongshu<tiehang.lth@taobao.com>
  * @module checkcode
  **/
-KISSY.add(function (S, IO, Placeholder) {
+KISSY.add('gallery/checkcode/1.0/index',function (S, IO, Placeholder) {
 
     /**
      *
